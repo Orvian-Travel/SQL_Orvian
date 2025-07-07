@@ -1,0 +1,92 @@
+-- Trigger that updates the UPDATED_AT field automatically whenever a record in TB_USERS is updated.
+
+CREATE TRIGGER TRG_UPDATE_USERS_UPDATED_AT
+ON TB_USERS
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON -- Turns off the count of affected rows to avoid unnecessary messages.
+    UPDATE TB_USERS
+    SET UPDATED_AT = GETDATE()
+    FROM TB_USERS U
+    INNER JOIN INSERTED I ON U.ID = I.ID;
+
+    -- Makes an INNER JOIN between the TB_USERS table and the magic inserted table (which stores the records that were updated).
+    -- Ensures that only the records modified by the UPDATE will have the UPDATED_AT field updated.
+
+END
+GO
+
+-- TB_RATINGS
+
+CREATE TRIGGER TRG_UPDATE_RATINGS_UPDATED_AT
+ON TB_RATINGS
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON 
+    UPDATE TB_RATINGS
+    SET UPDATED_AT = GETDATE()
+    FROM  TB_RATINGS R
+    INNER JOIN INSERTED I ON R.ID = I.ID;
+END
+GO
+
+-- TB_MEDIAS
+CREATE TRIGGER TRG_UPDATE_MEDIAS_UPDATED_AT
+ON TB_MEDIAS
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON
+    UPDATE TB_MEDIAS
+    SET UPDATED_AT = GETDATE()
+    FROM  TB_MEDIAS M
+    INNER JOIN INSERTED I ON I.ID = M.ID;
+END
+GO
+
+-- TB_RESERVARTIONS
+CREATE TRIGGER TRG_UPDATE_RESERVATIONS_UPDATED_AT
+ON TB_RESERVATIONS
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON
+    UPDATE TB_RESERVATIONS
+    SET UPDATED_AT = GETDATE()
+    FROM  TB_RESERVATIONS R
+    INNER JOIN INSERTED I ON I.ID = R.ID;
+END
+GO
+
+-- TB_PAYMENTS
+CREATE TRIGGER TRG_UPDATE_PAYMENTS_UPDATED_AT
+ON TB_PAYMENTS
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON
+    UPDATE TB_PAYMENTS
+    SET UPDATED_AT = GETDATE()
+    FROM  TB_PAYMENTS P
+    INNER JOIN INSERTED I ON I.ID = P.ID;
+END
+GO
+
+-- TB TRAVELERS
+CREATE TRIGGER TRG_UPDATE_TRAVELERS
+ON TB_TRAVELERS AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON
+    UPDATE TB_TRAVELERS
+    SET UPDATED_AT = GETDATE()
+    FROM TB_TRAVELERS T
+    INNER JOIN inserted I ON T.ID = I.ID
+    -- pode deixar menos redundante com WHERE ID IN (SELECT ID FROM inserted)
+    -- A trigger atualiza o campo UPDATED_AT com a data e hora atual sempre que um registro é atualizado. 
+    -- Usando magic table (que guarda a informação do registro atualizado) garantindo que apenas o registro afetado no update seja afetado
+END
+
+
