@@ -1,16 +1,332 @@
--- Views with TB_PAYMENTS
-CREATE VIEW VW_PAYMENTS_FORMATTED_PORTUGUESE AS
-SELECT
-    ID,
-    'R$ ' + REPLACE(FORMAT(VALUE_PAID, 'N2'), '.', ',') AS VALUE_PAID_FORMATTED,
-    PAYMENT_METHOD,
-    PAYMENT_STATUS,
-    PAYMENT_APPROVED_AT,
-    REPLACE(FORMAT(TAX, 'N1'), '.', ',') + '%' AS TAX_FORMATTED,
-    DISCOUNT,
-    DISCOUNT_REASON,
-    INSTALLMENT,
-    'R$ ' + REPLACE(FORMAT(INSTALLMENT_AMOUNT, 'N2'), '.', ',') AS INSTALLMENT_AMOUNT_FORMATTED,
-    CREATED_AT,
-    UPDATED_AT
-FROM TB_PAYMENTS
+-- =========================================================================
+-- VIEW: VW_PAGAMENTOS_PORTUGUES
+-- OBJETIVO: EXIBIR OS PAGAMENTOS COM CAMPOS FORMATADOS E ALIAS EM PORTUGUÊS
+-- =========================================================================
+CREATE OR ALTER VIEW VW_PAGAMENTOS_PORTUGUES AS
+    SELECT
+        ID AS ID_PAGAMENTO,
+        'R$ ' + REPLACE(FORMAT(VALUE_PAID, 'N2'), '.', ',') AS VALOR_PAGO_FORMATADO,
+        PAYMENT_METHOD AS FORMA_PAGAMENTO,
+        PAYMENT_STATUS AS STATUS_PAGAMENTO,
+        PAYMENT_APPROVED_AT AS DATA_APROVACAO_PAGAMENTO,
+        REPLACE(FORMAT(TAX, 'N1'), '.', ',') + '%' AS TAXA_FORMATADA,
+        DISCOUNT AS DESCONTO,
+        DISCOUNT_REASON AS MOTIVO_DESCONTO,
+        INSTALLMENT AS PARCELA,
+        'R$ ' + REPLACE(FORMAT(INSTALLMENT_AMOUNT, 'N2'), '.', ',') AS VALOR_PARCELA_FORMATADO,
+        CREATED_AT AS DATA_CRIACAO,
+        UPDATED_AT AS DATA_ATUALIZACAO
+    FROM TB_PAYMENTS
+GO
+
+
+-- =========================================================================
+-- VIEW: VW_USUARIOS_PORTUGUES
+-- OBJETIVO: EXIBIR OS USUÁRIOS COM ALIAS EM PORTUGUÊS
+-- =========================================================================
+CREATE OR ALTER VIEW VW_USUARIOS_PORTUGUES AS
+    SELECT
+        ID AS ID_USUARIO,
+        NAME AS NOME,
+        EMAIL AS EMAIL,
+        PASSWORD AS SENHA,
+        PHONE AS TELEFONE,
+        DOCUMENT AS DOCUMENTO,
+        BIRTHDATE AS DATA_NASCIMENTO,
+        ROLE AS PAPEL,
+        CREATED_AT AS DATA_CRIACAO,
+        UPDATED_AT AS DATA_ATUALIZACAO
+    FROM TB_USERS
+GO
+
+-- =========================================================================
+-- VIEW: VW_RESERVAS_PORTUGUES
+-- OBJETIVO: EXIBIR AS RESERVAS COM ALIAS EM PORTUGUÊS
+-- =========================================================================
+CREATE OR ALTER VIEW VW_RESERVAS_PORTUGUES AS
+    SELECT
+        ID AS ID_RESERVA,
+        RESERVATION_DATE AS DATA_RESERVA,
+        SITUATION AS SITUACAO,
+        CANCEL_DATE AS DATA_CANCELAMENTO,
+        CREATED_AT AS DATA_CRIACAO,
+        UPDATED_AT AS DATA_ATUALIZACAO
+    FROM TB_RESERVATIONS
+GO
+
+
+-- =========================================================================
+-- VIEW: VW_AVALIACOES_PORTUGUES
+-- OBJETIVO: EXIBIR AS AVALIAÇÕES COM ALIAS EM PORTUGUÊS
+-- =========================================================================
+CREATE OR ALTER VIEW VW_AVALIACOES_PORTUGUES AS
+    SELECT
+        ID AS ID_AVALIACAO,
+        RATE AS NOTA,
+        COMMENT AS COMENTARIO,
+        CREATED_AT AS DATA_CRIACAO,
+        UPDATED_AT AS DATA_ATUALIZACAO
+    FROM TB_RATINGS
+GO
+
+-- =========================================================================
+-- VIEW: VW_MIDIAS_PORTUGUES
+-- OBJETIVO: EXIBIR AS MIDIAS COM ALIAS EM PORTUGUÊS
+-- =========================================================================
+CREATE OR ALTER VIEW VW_MIDIAS_PORTUGUES AS
+    SELECT
+        ID AS ID_MIDIA,
+        CONTENT64 AS CONTEUDO_BASE64,
+        TYPE AS TIPO,
+        CREATED_AT AS DATA_CRIACAO,
+        UPDATED_AT AS DATA_ATUALIZACAO
+    FROM TB_MEDIAS
+GO
+
+
+-- =========================================================================
+-- VIEW: VW_VIAJANTES_PORTUGUES
+-- OBJETIVO: EXIBIR OS VIAJANTES COM ALIAS EM PORTUGUÊS
+-- =========================================================================
+CREATE OR ALTER VIEW VW_VIAJANTES_PORTUGUES AS
+    SELECT
+        ID AS ID_VIAJANTE,
+        NAME AS NOME,
+        EMAIL AS EMAIL,
+        CPF AS CPF,
+        BIRTHDATE AS DATA_NASCIMENTO,
+        CREATED_AT AS DATA_CRIACAO,
+        UPDATED_AT AS DATA_ATUALIZACAO
+    FROM TB_TRAVELERS
+GO
+
+-- =========================================================================
+-- VIEW: VW_DATAS_PACOTES_PORTUGUES
+-- OBJETIVO: EXIBIR AS DATAS DO PACOTE COM ALIAS EM PORTUGUÊS
+-- =========================================================================
+CREATE OR ALTER VIEW VW_DATAS_PACOTES_PORTUGUES AS
+    SELECT
+        ID AS ID_DATA_PACOTE,
+        START_DATE AS DATA_INICIO,
+        END_DATE AS DATA_FIM,
+        QTD_AVAILABLE AS QUANTIDADE_DISPONIVEL,
+        CREATED_AT AS DATA_CRIACAO,
+        UPDATED_AT AS DATA_ATUALIZACAO
+    FROM TB_PACKAGES_DATES
+GO
+
+-- =========================================================================
+-- VIEW: VW_PACOTES_PORTUGUES
+-- OBJETIVO: EXIBIR OS PACOTE COM ALIAS EM PORTUGUÊS
+-- =========================================================================
+CREATE OR ALTER VIEW VW_PACOTES_PORTUGUES AS
+    SELECT
+        ID AS ID_PACOTE,
+        TITLE AS TITULO,
+        DESCRIPTION_PACKAGE AS DESCRICAO_PACOTE,
+        DESTINATION AS DESTINO,
+        DURATION AS DURACAO,
+        PRICE AS PRECO,
+        MAX_PEOPLE AS MAXIMO_PESSOAS,
+        CREATED_AT AS DATA_CRIACAO,
+        UPDATED_AT AS DATA_ATUALIZACAO
+    FROM TB_PACKAGES
+GO
+
+-- =========================================================================
+-- VIEW: VW_RESERVATIONS_BY_USER_EMAIL
+-- OBJETIVO: EXIBIR TODAS AS RESERVAS DE UM USUÁRIO, IDENTIFICADO PELO SEU E-MAIL,
+--           INCLUINDO INFORMAÇÕES DA RESERVA E DO USUÁRIO
+-- =========================================================================
+CREATE OR ALTER VIEW VW_RESERVATIONS_BY_USER_EMAIL AS
+    SELECT
+        U.EMAIL             AS USER_EMAIL,
+        U.NAME              AS USER_NAME,
+        R.ID                AS RESERVATION_ID,
+        R.RESERVATION_DATE  AS RESERVATION_DATE,
+        R.SITUATION         AS SITUATION,
+        R.CANCEL_DATE       AS CANCEL_DATE,
+        R.CREATED_AT        AS RESERVATION_CREATED_AT,
+        R.UPDATED_AT        AS RESERVATION_UPDATED_AT
+    FROM TB_RESERVATIONS R
+    INNER JOIN TB_USERS U ON R.ID_USER = U.ID
+GO
+
+-- SELECT PARA EXTRAIR AS INFORMAÇÕES
+SELECT * FROM VW_RESERVATIONS_BY_USER_EMAIL WHERE USER_EMAIL = 'user@email.com'
+GO
+
+-- =========================================================================
+-- VIEW: VW_CONFIRMED_RESERVATIONS_BY_USER_EMAIL_CONFIRMED
+-- OBJETIVO: EXIBIR TODAS AS RESERVAS CONFIRMADAS DE UM USUÁRIO, IDENTIFICADO PELO SEU E-MAIL,
+--           INCLUINDO INFORMAÇÕES DA RESERVA E DO USUÁRIO
+-- =========================================================================
+CREATE OR ALTER VIEW VW_CONFIRMED_RESERVATIONS_BY_USER_EMAIL_CONFIRMED AS
+    SELECT
+        U.EMAIL             AS USER_EMAIL,
+        U.NAME              AS USER_NAME,
+        R.ID                AS RESERVATION_ID,
+        R.RESERVATION_DATE  AS RESERVATION_DATE,
+        R.SITUATION         AS SITUATION,
+        R.CANCEL_DATE       AS CANCEL_DATE,
+        R.CREATED_AT        AS RESERVATION_CREATED_AT,
+        R.UPDATED_AT        AS RESERVATION_UPDATED_AT
+    FROM TB_RESERVATIONS R
+    INNER JOIN TB_USERS U ON R.ID_USER = U.ID
+    WHERE R.SITUATION = 'confirmada'
+GO
+
+-- SELECT PARA EXTRAIR AS INFORMAÇÕES
+SELECT * FROM  VW_CONFIRMED_RESERVATIONS_BY_USER_EMAIL_CONFIRMED WHERE USER_EMAIL = 'user@email.com'
+GO
+
+-- =========================================================================
+-- VIEW: VW_CONFIRMED_RESERVATIONS_BY_USER_EMAIL
+-- OBJETIVO: EXIBIR TODAS AS RESERVAS CANCELADAS DE UM USUÁRIO, IDENTIFICADO PELO SEU E-MAIL,
+--           INCLUINDO INFORMAÇÕES DA RESERVA E DO USUÁRIO
+-- =========================================================================
+CREATE OR ALTER VIEW VW_CONFIRMED_RESERVATIONS_BY_USER_EMAIL_CANCELED AS
+    SELECT
+        U.EMAIL             AS USER_EMAIL,
+        U.NAME              AS USER_NAME,
+        R.ID                AS RESERVATION_ID,
+        R.RESERVATION_DATE  AS RESERVATION_DATE,
+        R.SITUATION         AS SITUATION,
+        R.CANCEL_DATE       AS CANCEL_DATE,
+        R.CREATED_AT        AS RESERVATION_CREATED_AT,
+        R.UPDATED_AT        AS RESERVATION_UPDATED_AT
+    FROM TB_RESERVATIONS R
+    INNER JOIN TB_USERS U ON R.ID_USER = U.ID
+    WHERE R.SITUATION = 'cancelado'
+GO
+
+-- SELECT PARA EXTRAIR AS INFORMAÇÕES
+SELECT * FROM  VW_CONFIRMED_RESERVATIONS_BY_USER_EMAIL_CANCELED WHERE USER_EMAIL = 'user@email.com'
+GO
+
+-- =========================================================================
+-- VIEW: VW_TRAVELERS_COUNT_BY_PACKAGE_DATE
+-- OBJETIVO: EXIBIR A QUANTIDADE DE VIAJANTES ASSOCIADOS A UMA DATA DE PACOTE,
+--           FILTRANDO POR START_DATE
+-- =========================================================================
+CREATE OR ALTER VIEW VW_TRAVELERS_COUNT_BY_PACKAGE_DATE AS
+    SELECT
+        PD.ID AS PACKAGE_DATE_ID,
+        PD.START_DATE,
+        PD.END_DATE,
+        COUNT(T.ID) AS TRAVELERS_COUNT
+    FROM TB_PACKAGES_DATES PD
+    INNER JOIN TB_RESERVATIONS R ON R.ID_PACKAGES_DATES = PD.ID
+    INNER JOIN TB_TRAVELERS T ON T.ID_RESERVA = R.ID
+    GROUP BY PD.ID, PD.START_DATE, PD.END_DATE
+GO
+
+-- SELECT PARA EXTRAIR AS INFORMAÇÕES
+SELECT * FROM VW_TRAVELERS_COUNT_BY_PACKAGE_DATE WHERE START_DATE = '2025-08-01'
+GO
+
+-- =========================================================================
+-- VIEW: VW_TRAVELERS_COUNT_BY_USER_AND_DATE
+-- OBJETIVO: RELACIONAR USUÁRIOS (POR EMAIL) ÀS DATAS DE PACOTES,
+--           CONTANDO QUANTOS VIAJANTES HÁ EM CADA DATA PARA CADA USUÁRIO
+-- =========================================================================
+CREATE OR ALTER VIEW VW_TRAVELERS_COUNT_BY_USER_AND_DATE AS
+    SELECT
+        U.EMAIL             AS USER_EMAIL,
+        U.NAME              AS USER_NAME,
+        PD.ID               AS PACKAGE_DATE_ID,
+        PD.START_DATE,
+        PD.END_DATE,
+        COUNT(T.ID)         AS TRAVELERS_COUNT
+    FROM TB_USERS U
+    INNER JOIN TB_RESERVATIONS R
+        ON U.ID = R.ID_USER
+    INNER JOIN TB_PACKAGES_DATES PD
+        ON R.ID_PACKAGES_DATES = PD.ID
+    INNER JOIN TB_TRAVELERS T
+        ON T.ID_RESERVA = R.ID
+    GROUP BY
+        U.EMAIL,
+        U.NAME,
+        PD.ID,
+        PD.START_DATE,
+        PD.END_DATE
+GO
+
+-- SELECT PARA EXTRAIR AS INFORMAÇÕES
+SELECT * FROM VW_TRAVELERS_COUNT_BY_USER_AND_DATE WHERE USER_EMAIL = 'user@email.com'
+GO
+-- ou para uma data específica:
+SELECT * FROM VW_TRAVELERS_COUNT_BY_USER_AND_DATE WHERE START_DATE = '2025-08-01'
+GO
+
+-- =========================================================================
+-- VIEW: VW_PACKAGES_BY_RATINGS
+-- OBJETIVO: ORGANIZAR OS PACOTES BASEADO NAS AVALIAÇÕES DAS RESERVAS,
+--           EXIBINDO INFORMAÇÕES DO PACOTE, QUANTIDADE DE AVALIAÇÕES,
+--           MÉDIA DAS NOTAS E TOTAL DE RESERVAS AVALIADAS
+-- =========================================================================
+CREATE OR ALTER VIEW VW_PACKAGES_BY_RATINGS AS
+    SELECT
+        P.ID                    AS PACKAGE_ID,
+        P.TITLE                 AS PACKAGE_TITLE,
+        P.DESTINATION           AS PACKAGE_DESTINATION,
+        P.PRICE                 AS PACKAGE_PRICE,
+        COUNT(RAT.ID)           AS RATINGS_COUNT,
+        AVG(CAST(RAT.RATE AS FLOAT)) AS AVERAGE_RATING,
+        COUNT(DISTINCT RES.ID)  AS RESERVATIONS_WITH_RATINGS
+    FROM TB_PACKAGES P
+    INNER JOIN TB_PACKAGES_DATES PD   ON PD.ID_PACKAGE = P.ID
+    INNER JOIN TB_RESERVATIONS RES    ON RES.ID_PACKAGES_DATES = PD.ID
+    INNER JOIN TB_RATINGS RAT         ON RAT.ID_RESERVE = RES.ID
+    GROUP BY
+        P.ID,
+        P.TITLE,
+        P.DESTINATION,
+        P.PRICE
+GO
+
+-- SELECT PARA EXTRAIR AS INFORMAÇÕES
+SELECT * FROM VW_PACKAGES_BY_RATINGS
+GO
+
+-- =========================================================================
+-- VIEW: VW_USERS_ID_EMAIL_BY_RESERVATION
+-- OBJETIVO: EXIBIR O ID E O EMAIL DO USUÁRIO ATRIBUÍDO A CADA RESERVA,
+--           INCLUINDO TODOS OS CAMPOS DA RESERVA
+-- =========================================================================
+CREATE OR ALTER VIEW VW_USERS_ID_EMAIL_BY_RESERVATION AS
+    SELECT
+        R.ID              AS RESERVATION_ID,
+        U.ID              AS USER_ID,
+        U.EMAIL           AS USER_EMAIL,
+        R.RESERVATION_DATE,
+        R.SITUATION,
+        R.CANCEL_DATE,
+        R.ID_PACKAGES_DATES,
+        R.CREATED_AT,
+        R.UPDATED_AT
+    FROM TB_RESERVATIONS R
+    INNER JOIN TB_USERS U ON R.ID_USER = U.ID
+GO
+
+-- =========================================================================
+-- VIEW: VW_AVAILABLE_RESERVATIONS_BY_DATE
+-- OBJETIVO: CONTAR A QUANTIDADE DE RESERVAS DISPONÍVEIS (AVAILABLE) POR DATA DE PACOTE
+-- =========================================================================
+CREATE OR ALTER VIEW VW_AVAILABLE_RESERVATIONS_BY_DATE AS
+    SELECT
+        PD.ID            AS PACKAGE_DATE_ID,
+        PD.START_DATE,
+        PD.END_DATE,
+        COUNT(R.ID)      AS QTD_AVAILABLE
+    FROM TB_PACKAGES_DATES PD
+    LEFT JOIN TB_RESERVATIONS R
+        ON R.ID_PACKAGES_DATES = PD.ID
+        AND R.SITUATION = 'AVAILABLE'
+    GROUP BY
+        PD.ID,
+        PD.START_DATE,
+        PD.END_DATE 
+GO
+
