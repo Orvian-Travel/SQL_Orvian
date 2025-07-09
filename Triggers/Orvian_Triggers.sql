@@ -4,7 +4,7 @@
 -- Tabela: TB_PAYMENTS
 -- Evento: UPDATE
 -- =================================================================
-CREATE TRIGGER TRG_SET_PAYMENT_APPROVED_AT ON TB_PAYMENTS
+CREATE OR ALTER TRIGGER TRG_SET_PAYMENT_APPROVED_AT ON TB_PAYMENTS
 AFTER
 UPDATE AS BEGIN
 SET NOCOUNT ON
@@ -27,7 +27,7 @@ GO
 -- Tabela: TB_PACKAGES_DATES
 -- Eventos: INSERT e UPDATE
 -- =================================================================
-CREATE TRIGGER TRG_VALIDATE_PACKAGE_DATES
+CREATE OR ALTER TRIGGER TRG_VALIDATE_PACKAGE_DATES
 ON TB_PACKAGES_DATES
 AFTER INSERT, UPDATE
 AS
@@ -46,7 +46,7 @@ GO
 -- Tabela: TB_PACKAGES_DATES
 -- Eventos: INSERT e UPDATE
 -- =================================================================
-CREATE TRIGGER TRG_PREVENT_PAST_DATES
+CREATE OR ALTER TRIGGER TRG_PREVENT_PAST_DATES
 ON TB_PACKAGES_DATES
 AFTER INSERT, UPDATE
 AS
@@ -65,40 +65,47 @@ GO
 -- Tabela: TB_PACKAGES_DATES
 -- Eventos: INSERT e UPDATE
 -- =================================================================
-CREATE TRIGGER TRG_VALIDATE_QTD_AVAILABLE
+CREATE OR ALTER TRIGGER TRG_VALIDATE_QTD_AVAILABLE
 ON TB_PACKAGES_DATES
 AFTER INSERT, UPDATE
 AS
 BEGIN
-    IF EXISTS (SELECT 1 FROM inserted WHERE QTD_AVAILABLE <= 0)
+    IF EXISTS (SELECT 1 FROM inserted WHERE QTD_AVAILABLE < 0)
     BEGIN
-        RAISERROR('A quantidade disponível deve ser maior que zero', 16, 1)
+        RAISERROR('A quantidade disponível deve ser maior ou igual que zero', 16, 1)
         ROLLBACK TRANSACTION
     END
 END
 GO
 
 -- =================================================================
--- TRIGGER 5: Verificação de Capacidade Máxima
--- Objetivo: Impedir que a quantidade disponível seja maior que a capacidade máxima do pacote
+-- TRIGGER 5: Verificação de Capacidade Máxima de Viajantes
+-- Objetivo: Impedir que o número de viajantes associados a cada pacote/data exceda a capacidade máxima do pacote (MAX_PEOPLE em TB_PACKAGES)
 -- Tabela: TB_PACKAGES_DATES
 -- Eventos: INSERT e UPDATE
--- Relacionamento: Verifica contra TB_PACKAGES.MAX_PEOPLE
--- Não executada, conflito com regras de negócios
+-- Relacionamento: Verifica TB_TRAVELERS e TB_PACKAGES.MAX_PEOPLE
 -- =================================================================
-CREATE TRIGGER TRG_CHECK_MAX_CAPACITY
+CREATE OR ALTER TRIGGER TRG_CHECK_MAX_CAPACITY
 ON TB_PACKAGES_DATES
 AFTER INSERT, UPDATE
 AS
 BEGIN
+    SET NOCOUNT ON;
+
     IF EXISTS (
-        SELECT 1 
-        FROM inserted i
-        INNER JOIN TB_PACKAGES p ON i.ID_PACKAGE = p.ID
-        WHERE i.QTD_AVAILABLE > p.MAX_PEOPLE
+        SELECT 1
+        FROM INSERTED I
+        INNER JOIN TB_PACKAGES P ON I.ID_PACKAGE = P.ID
+        OUTER APPLY (
+            SELECT COUNT(T.ID) AS QTD_VIAJANTES
+            FROM TB_RESERVATIONS R
+            INNER JOIN TB_TRAVELERS T ON T.ID_RESERVA = R.ID
+            WHERE R.ID_PACKAGES_DATES = I.ID
+        ) AS VIAJANTES
+        WHERE VIAJANTES.QTD_VIAJANTES > P.MAX_PEOPLE
     )
     BEGIN
-        RAISERROR('A quantidade disponível não pode ser maior que a capacidade máxima do pacote', 16, 1)
+        RAISERROR('A QUANTIDADE DE VIAJANTES EXCEDE A CAPACIDADE MÁXIMA DO PACOTE.', 16, 1)
         ROLLBACK TRANSACTION
     END
 END
@@ -110,7 +117,7 @@ GO
 -- Tabela: TB_PACKAGES
 -- Eventos: INSERT e UPDATE
 -- =================================================================
-CREATE TRIGGER TRG_VALIDATE_PACKAGE_PRICE
+CREATE OR ALTER TRIGGER TRG_VALIDATE_PACKAGE_PRICE
 ON TB_PACKAGES
 AFTER INSERT, UPDATE
 AS
@@ -129,7 +136,7 @@ GO
 -- Tabela: TB_PACKAGES
 -- Eventos: INSERT e UPDATE
 -- =================================================================
-CREATE TRIGGER TRG_VALIDATE_PACKAGE_FIELDS
+CREATE OR ALTER TRIGGER TRG_VALIDATE_PACKAGE_FIELDS
 ON TB_PACKAGES
 AFTER INSERT, UPDATE
 AS
@@ -148,7 +155,7 @@ GO
 -- Tabela: TB_PACKAGES
 -- Eventos: INSERT e UPDATE
 -- =================================================================
-CREATE TRIGGER TRG_VALIDATE_PACKAGE_DURATION
+CREATE OR ALTER TRIGGER TRG_VALIDATE_PACKAGE_DURATION
 ON TB_PACKAGES
 AFTER INSERT, UPDATE
 AS
@@ -168,7 +175,7 @@ GO
 -- Eventos: DELETE
 -- Relacionamento: Verifica TB_PACKAGES_DATES
 -- =================================================================
-CREATE TRIGGER TRG_PREVENT_DELETE_WITH_ACTIVE_DATES
+CREATE OR ALTER TRIGGER TRG_PREVENT_DELETE_WITH_ACTIVE_DATES
 ON TB_PACKAGES
 INSTEAD OF DELETE
 AS
@@ -186,6 +193,106 @@ BEGIN
     ELSE
     BEGIN
         DELETE FROM TB_PACKAGES WHERE ID IN (SELECT ID FROM deleted)
+    END
+END
+GO
+
+-- =================================================================
+-- TRIGGER 10: Validação de Compatibilidade entre Período das Datas e Duração do Pacote
+-- Objetivo: Garantir que a diferença de dias entre START_DATE e END_DATE em TB_PACKAGES_DATES
+--           seja compatível com o campo DURATION definido em TB_PACKAGES. Em caso de inconsistência,
+--           a operação é cancelada e retorna erro.
+-- Tabela: TB_PACKAGES_DATES (relacionando com TB_PACKAGES)
+-- Evento: INSERT, UPDATE
+-- =================================================================
+
+CREATE OR ALTER TRIGGER TRG_TB_PACKAGES_DATES_VALIDATE_DURATION
+ON TB_PACKAGES_DATES
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS (
+        SELECT 1
+        FROM INSERTED I
+        INNER JOIN TB_PACKAGES P ON I.ID_PACKAGE = P.ID
+        WHERE DATEDIFF(DAY, I.START_DATE, I.END_DATE) <> P.DURATION
+    )
+    BEGIN
+        RAISERROR (
+            'A diferença entre START_DATE e END_DATE em TB_PACKAGES_DATES deve ser igual ao DURATION do pacote correspondente em TB_PACKAGES.',
+            16, 1
+        );
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+END
+GO
+
+-- =================================================================
+-- TRIGGER 11: VALIDAÇÃO DE STATUS DE RESERVA COM PAGAMENTO APROVADO
+-- OBJETIVO: IMPEDIR QUE O STATUS DA RESERVA (SITUATION EM TB_RESERVATIONS) SEJA 'RESERVADA'
+--           CASO O STATUS DO PAGAMENTO (PAYMENT_STATUS EM TB_PAYMENTS) NÃO SEJA 'APROVADO'
+-- TABELA: TB_RESERVATIONS
+-- EVENTOS: INSERT E UPDATE
+-- RELACIONAMENTO: TB_PAYMENTS.ID_RESERVATION -> TB_RESERVATIONS.ID
+-- =================================================================
+CREATE OR ALTER TRIGGER TRG_RESERVATION_STATUS_PAYMENT_APPROVED
+ON TB_RESERVATIONS
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS (
+        SELECT 1
+        FROM INSERTED I
+        INNER JOIN TB_PAYMENTS P ON P.ID_RESERVATION = I.ID
+        WHERE I.SITUATION = 'confirmada'
+          AND P.PAYMENT_STATUS <> 'aprovado'
+    )
+    BEGIN
+        RAISERROR('NÃO É PERMITIDO DEFINIR O STATUS DA RESERVA COMO ''RESERVADA'' SEM QUE O STATUS DO PAGAMENTO SEJA ''APROVADO''.', 16, 1)
+        ROLLBACK TRANSACTION
+    END
+END
+GO
+
+-- =================================================================
+-- TRIGGER 12: ATUALIZAÇÃO DA QUANTIDADE DISPONÍVEL EM TB_PACKAGES_DATES
+-- OBJETIVO: REDUZIR O CAMPO QTD_AVAILABLE EM TB_PACKAGES_DATES EM 1
+--           SEMPRE QUE UMA NOVA RESERVA FOR INSERIDA EM TB_RESERVATIONS
+--           PARA A DATA DO PACOTE CORRESPONDENTE
+-- TABELA: TB_RESERVATIONS
+-- EVENTO: INSERT
+-- RELACIONAMENTO: TB_RESERVATIONS.ID_PACKAGES_DATES -> TB_PACKAGES_DATES.ID
+-- =================================================================
+CREATE OR ALTER TRIGGER TRG_UPDATE_QTD_AVAILABLE
+ON TB_RESERVATIONS
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE PD
+    SET QTD_AVAILABLE = CASE 
+        WHEN QTD_AVAILABLE > 0 THEN QTD_AVAILABLE - 1
+        ELSE 0
+    END
+    FROM TB_PACKAGES_DATES PD
+    INNER JOIN INSERTED I ON PD.ID = I.ID_PACKAGES_DATES;
+
+    -- OPICIONAL: BLOQUEAR INSERÇÃO SE NÃO HOUVER VAGAS DISPONÍVEIS
+    IF EXISTS (
+        SELECT 1
+        FROM TB_PACKAGES_DATES PD
+        INNER JOIN INSERTED I ON PD.ID = I.ID_PACKAGES_DATES
+        WHERE PD.QTD_AVAILABLE < 0
+    )
+    BEGIN
+        RAISERROR('NÃO HÁ MAIS VAGAS DISPONÍVEIS PARA ESTA DATA DE PACOTE.', 16, 1)
+        ROLLBACK TRANSACTION
     END
 END
 GO
