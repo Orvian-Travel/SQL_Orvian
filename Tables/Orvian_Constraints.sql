@@ -97,3 +97,110 @@ ADD CONSTRAINT CK_CPF_FORMAT CHECK (
     CPF LIKE '[0-9][0-9][0-9].[0-9][0-9][0-9].[0-9][0-9][0-9]-[0-9][0-9]'
 )
 GO
+
+-- =================================================================
+-- CONSTRAINTS PARA TB_PACKAGES
+-- =================================================================
+
+-- Constraint para garantir que o preço seja maior ou igual a zero
+ALTER TABLE TB_PACKAGES
+ADD CONSTRAINT CK_PRICE CHECK (PRICE >= 0)
+GO
+
+-- Constraint para garantir que a duração seja maior que zero
+ALTER TABLE TB_PACKAGES
+ADD CONSTRAINT CK_DURATION CHECK (DURATION > 0)
+GO
+
+-- Constraint para garantir que o máximo de pessoas seja maior que zero
+ALTER TABLE TB_PACKAGES
+ADD CONSTRAINT CK_MAX_PEOPLE CHECK (MAX_PEOPLE > 0)
+GO
+
+-- Constraint para garantir que o título não seja vazio ou apenas espaços
+ALTER TABLE TB_PACKAGES
+ADD CONSTRAINT CK_TITLE_NOT_EMPTY 
+CHECK (LEN(LTRIM(RTRIM(TITLE))) > 0)
+GO
+
+-- Constraint para garantir que o destino não seja vazio ou apenas espaços
+ALTER TABLE TB_PACKAGES
+ADD CONSTRAINT CK_DESTINATION_NOT_EMPTY 
+CHECK (LEN(LTRIM(RTRIM(DESTINATION))) > 0)
+GO
+
+-- Constraint para garantir que a descrição não seja vazia ou apenas espaços
+ALTER TABLE TB_PACKAGES
+ADD CONSTRAINT CK_DESCRIPTION_NOT_EMPTY 
+CHECK (LEN(LTRIM(RTRIM(DESCRIPTION_PACKAGE))) > 0)
+GO
+
+-- Constraint para limitar a duração máxima (ex: máximo 365 dias)
+ALTER TABLE TB_PACKAGES
+ADD CONSTRAINT CK_DURATION_MAX 
+CHECK (DURATION <= 365)
+GO
+
+-- Constraint para definir um preço máximo razoável (ex: R$ 50.000)
+ALTER TABLE TB_PACKAGES
+ADD CONSTRAINT CK_PRICE_MAX 
+CHECK (PRICE <= 50000.00)
+GO
+
+-- Constraint para limitar o número máximo de pessoas por pacote
+ALTER TABLE TB_PACKAGES
+ADD CONSTRAINT CK_MAX_PEOPLE_LIMIT 
+CHECK (MAX_PEOPLE <= 100)
+GO
+
+-- =================================================================
+-- CONSTRAINTS PARA TB_PACKAGES_DATES
+-- =================================================================
+
+-- Constraint para garantir que a data de fim seja posterior à data de início
+ALTER TABLE TB_PACKAGES_DATES
+ADD CONSTRAINT CK_END_DATE_AFTER_START 
+CHECK (END_DATE > START_DATE)
+GO
+
+-- Constraint para garantir que a data de início não seja muito no futuro (ex: máximo 2 anos)
+ALTER TABLE TB_PACKAGES_DATES
+ADD CONSTRAINT CK_START_DATE_NOT_TOO_FUTURE 
+CHECK (START_DATE <= DATEADD(YEAR, 2, GETDATE()))
+GO
+
+-- Constraint para garantir que a quantidade disponível seja positiva
+ALTER TABLE TB_PACKAGES_DATES
+ADD CONSTRAINT CK_QTD_AVAILABLE_POSITIVE 
+CHECK (QTD_AVAILABLE > 0)
+GO
+
+-- Constraint para limitar a quantidade máxima disponível
+ALTER TABLE TB_PACKAGES_DATES
+ADD CONSTRAINT CK_QTD_AVAILABLE_MAX 
+CHECK (QTD_AVAILABLE <= 500)
+GO
+
+-- Constraint para garantir que a duração do período (END_DATE - START_DATE) seja compatível com a duração do pacote
+-- Esta constraint verifica se a diferença entre as datas está dentro de uma margem razoável da duração do pacote
+ALTER TABLE TB_PACKAGES_DATES
+ADD CONSTRAINT CK_DATE_DURATION_COMPATIBILITY 
+CHECK (DATEDIFF(DAY, START_DATE, END_DATE) >= 1)
+GO
+-- Fazer um trigger para atribuir o valor automaticamente
+
+-- =================================================================
+-- CONSTRAINTS DE UNICIDADE
+-- =================================================================
+
+-- Garantir que não existam duas datas iguais para o mesmo pacote
+ALTER TABLE TB_PACKAGES_DATES
+ADD CONSTRAINT UK_PACKAGE_START_DATE 
+UNIQUE (ID_PACKAGE, START_DATE)
+GO
+
+-- Garantir que os títulos dos pacotes sejam únicos
+ALTER TABLE TB_PACKAGES
+ADD CONSTRAINT UK_PACKAGE_TITLE 
+UNIQUE (TITLE)
+GO

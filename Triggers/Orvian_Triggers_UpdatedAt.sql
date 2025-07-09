@@ -88,5 +88,35 @@ BEGIN
     -- A trigger atualiza o campo UPDATED_AT com a data e hora atual sempre que um registro é atualizado. 
     -- Usando magic table (que guarda a informação do registro atualizado) garantindo que apenas o registro afetado no update seja afetado
 END
+GO
+
+
+-- TB_PACKAGES
+CREATE TRIGGER TRG_UPDATE_PACKAGES_UPDATED_AT
+ON TB_PACKAGES
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON
+    UPDATE TB_PACKAGES
+    SET UPDATED_AT = GETDATE()
+    FROM  TB_PACKAGES P
+    INNER JOIN INSERTED I ON I.ID = P.ID;
+END
+GO
+
+-- TB_PACKAGES_DATES
+CREATE TRIGGER TRG_UPDATE_PACKAGES_DATES_UPDATED_AT
+ON TB_PACKAGES_DATES
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON
+    UPDATE TB_PACKAGES_DATES
+    SET UPDATED_AT = GETDATE()
+    FROM  TB_PACKAGES_DATES PD
+    INNER JOIN INSERTED I ON I.ID = PD.ID;
+END
+GO
 
 
