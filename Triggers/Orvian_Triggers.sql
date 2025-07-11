@@ -340,6 +340,9 @@ AFTER UPDATE
 AS
 BEGIN
     -- Libera vaga só para reservas que mudaram de NÃO cancelada para cancelada
+
+    SET NOCOUNT ON;
+
     UPDATE PD
     SET PD.QTD_AVAILABLE = PD.QTD_AVAILABLE + 1
     FROM TB_PACKAGES_DATES PD
@@ -411,6 +414,9 @@ ON TB_RESERVATIONS
 AFTER DELETE
 AS
 BEGIN
+
+    SET NOCOUNT ON;
+
     -- Libera vaga só para reservas deletadas que NÃO estavam canceladas
     UPDATE PD
     SET PD.QTD_AVAILABLE = PD.QTD_AVAILABLE + 1
