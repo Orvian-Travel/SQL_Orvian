@@ -325,9 +325,6 @@ BEGIN
 END
 GO
 
-DISABLE TRIGGER TRG_UPDATE_RESERVATIONS_UPDATED_AT ON TB_RESERVATIONS;
-go
-
 -- =================================================================
 -- TRIGGER 14: LIBERAÇÃO DE VAGA EM DATA DE PACOTE AO CANCELAR RESERVA
 -- OBJETIVO: INCREMENTAR QTD_AVAILABLE EM TB_PACKAGES_DATES AO CANCELAR OU EXCLUIR RESERVA
@@ -423,5 +420,28 @@ BEGIN
     FROM TB_PACKAGES_DATES PD
     INNER JOIN DELETED D ON PD.ID = D.ID_PACKAGES_DATES
     WHERE D.SITUATION <> 'cancelada';
+END
+GO
+
+-- =================================================================
+-- TRIGGER 18: Atualização de Data de Cancelamento de Reserva
+-- Objetivo: Atualizar automaticamente o campo CANCEL_DATE quando o status da reserva mudar para 'cancelada'
+-- Tabela: TB_RESERVATIONS
+-- Evento: UPDATE
+-- =================================================================
+CREATE OR ALTER TRIGGER TRG_SET_RESERVATION_CANCEL_DATE
+ON TB_RESERVATIONS
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE TB_RESERVATIONS
+    SET CANCEL_DATE = GETDATE()
+    FROM TB_RESERVATIONS R
+        INNER JOIN INSERTED I ON R.ID = I.ID
+        INNER JOIN DELETED D ON D.ID = I.ID
+    WHERE I.SITUATION = 'cancelada'
+      AND (D.SITUATION <> 'cancelada' OR D.SITUATION IS NULL);
 END
 GO

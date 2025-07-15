@@ -134,4 +134,18 @@ BEGIN
 END
 GO
 
-
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='TB_PROMOTIONS')
+BEGIN
+    CREATE TABLE TB_PROMOTIONS (
+        ID UNIQUEIDENTIFIER DEFAULT NEWID() PRIMARY KEY,
+        CODE VARCHAR(50) NULL, -- código/cupom da promoção
+        NAME VARCHAR(100) NOT NULL DEFAULT 'Promoção', -- Nome da promoção (ex: "Winter Sale")
+        DESCRIPTION VARCHAR(255),   -- opcional: descrição da promoção
+        START_DATE DATETIME NOT NULL, -- início da validade
+        END_DATE DATETIME NOT NULL,   -- fim da validade
+        DISCOUNT_PERCENT FLOAT NOT NULL, -- porcentagem de desconto (0-100)
+        CREATED_AT DATETIME NOT NULL DEFAULT GETDATE(),
+        UPDATED_AT DATETIME NOT NULL DEFAULT GETDATE(),
+    )
+END
+GO

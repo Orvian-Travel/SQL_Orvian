@@ -68,6 +68,7 @@ VALUES
 ('Ilha Grande dos Sonhos', 'Passeios de barco e trilhas em meio à natureza paradisíaca.', 'Ilha Grande', 5, 2100.00, 40, GETDATE(), GETDATE()),
 
 ('Lençóis Maranhenses Surreal', 'Explore o deserto das águas em um cenário único.', 'Lençóis Maranhenses', 6, 2650.00, 35, GETDATE(), GETDATE());
+GO
 
 
 SELECT * FROM TB_PACKAGES;
@@ -192,7 +193,6 @@ INSERT INTO TB_RESERVATIONS (ID_USER, ID_PACKAGES_DATES, RESERVATION_DATE, SITUA
 	('C670ABBF-BF15-4AE7-8059-8E6511DC3B0D', '2FB47260-38D5-46ED-B3A4-06788C6E23DC', GETDATE(), 'PENDENTE');
 GO
 
-DELETE FROM TB_RESERVATIONS
 
 UPDATE TB_RESERVATIONS
 SET SITUATION = 'cancelada'
@@ -202,6 +202,8 @@ WHERE ID IN (
   AND SITUATION <> 'cancelada';
 GO
 
+
+-- Lembrar de usar essa com view
   SELECT ID_PACKAGES_DATES, COUNT(*) AS num_cancelamentos
 FROM TB_RESERVATIONS
 WHERE SITUATION = 'cancelada'
@@ -209,17 +211,12 @@ GROUP BY ID_PACKAGES_DATES
 GO
 
 UPDATE TB_RESERVATIONS
-SET SITUATION = 'PENDENTE'
-WHERE SITUATION = 'cancelada';
+SET RESERVATION_DATE = GETDATE()
+WHERE id = '51335591-8ABB-4665-A0B2-86154B8FEF0E'
 GO
 
 SELECT * FROM TB_RESERVATIONS
 GO
-
-SELECT name, OBJECT_DEFINITION(OBJECT_ID) as trigger_body
-FROM sys.triggers
-WHERE parent_id = OBJECT_ID('TB_RESERVATIONS');
-
 -- TODO - IMPLEMENTAR NOVAMENTE ESTAS TABELAS
 
 -- ===========================================================

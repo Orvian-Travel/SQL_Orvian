@@ -226,3 +226,11 @@ ALTER TABLE TB_PACKAGES
 ADD CONSTRAINT UK_PACKAGE_TITLE 
 UNIQUE (TITLE)
 GO
+
+
+-- =================================================================
+-- CONSTRAINTS PARA TB_PROMOTIONS
+-- =================================================================
+ALTER TABLE TB_PROMOTIONS
+ADD CONSTRAINT CK_PROMOTIONS_DISCOUNT_PERCENT CHECK (DISCOUNT_PERCENT >= 0 AND DISCOUNT_PERCENT <= 100);
+GO
