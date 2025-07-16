@@ -5,9 +5,9 @@
 -- Evento: UPDATE
 -- =================================================================
 CREATE OR ALTER TRIGGER TRG_SET_PAYMENT_APPROVED_AT ON TB_PAYMENTS
-AFTER
-UPDATE AS BEGIN
-SET NOCOUNT ON
+AFTER UPDATE 
+AS BEGIN
+    SET NOCOUNT ON
     UPDATE TB_PAYMENTS
 SET PAYMENT_APPROVED_AT = GETDATE()
 FROM TB_PAYMENTS P 
@@ -443,5 +443,88 @@ BEGIN
         INNER JOIN DELETED D ON D.ID = I.ID
     WHERE I.SITUATION = 'cancelada'
       AND (D.SITUATION <> 'cancelada' OR D.SITUATION IS NULL);
+END
+GO
+
+-- =================================================================
+-- TRIGGER 19: Atualização de Data de Cancelamento de Reserva
+-- Objetivo: Criar uma restrição para que o value_paid, obedeça como funciona
+-- do valor total na aplicação.
+-- Tabela: TB_PAYMENTS
+-- Evento: INSERT E UPDATE
+-- =================================================================
+CREATE OR ALTER TRIGGER TRG_VALIDATE_VALUE_PAID
+ON TB_PAYMENTS
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    -- Verifica cada pagamento alterado/inserido
+    IF EXISTS (
+        SELECT 1
+        FROM INSERTED I
+        INNER JOIN TB_RESERVATIONS R ON R.ID = I.ID_RESERVATION
+        INNER JOIN TB_PACKAGES_DATES PD ON PD.ID = R.ID_PACKAGES_DATES
+        INNER JOIN TB_PACKAGES P ON P.ID = PD.ID_PACKAGE
+        -- Subqueries diretas para descontos e quantidade de viajantes
+        LEFT JOIN TB_PROMOTIONS PR1 ON PR1.ID = P.ID_PROMOTION
+        LEFT JOIN TB_PROMOTIONS PR2 ON PR2.ID = I.ID_PROMOTION
+        -- Conta viajantes diretamente
+        CROSS APPLY (
+            SELECT COUNT(*) AS QTD_VIAJANTES
+            FROM TB_TRAVELERS T
+            WHERE T.ID_RESERVATION = R.ID
+        ) QV
+        -- Calcula valor final
+        WHERE
+            -- Valor esperado
+            ABS(
+                I.VALUE_PAID - 
+                (
+                    -- preço do pacote × quantidade de viajantes
+                    (P.PRICE * QV.QTD_VIAJANTES)
+                    -- aplica descontos (se houver)
+                    * (1 - (COALESCE(PR1.DISCOUNT_PERCENT, 0) + COALESCE(PR2.DISCOUNT_PERCENT, 0)) / 100.0)
+                    -- aplica taxa (se houver)
+                    * (1 + COALESCE(I.TAX, 0) / 100.0)
+                )
+            ) > 0.01
+    )
+    BEGIN
+        RAISERROR('O VALUE_PAID está diferente do valor calculado considerando promoções, taxa e quantidade de viajantes!', 16, 1)
+        ROLLBACK TRANSACTION
+        RETURN
+    END
+END
+GO
+
+-- =========================================================================
+-- TRIGGER 20: TRG_VALIDATE_MAX_DISCOUNT
+-- OBJETIVO: IMPEDIR QUE A SOMA DOS DESCONTOS (PROMOÇÃO DO PACOTE + CUPOM DO PAGAMENTO)
+--           ULTRAPASSE 80% DO VALOR BRUTO DA RESERVA AO REALIZAR PAGAMENTO
+--           (EVITA ABUSO DE DESCONTOS E GARANTE INTEGRIDADE DAS REGRAS DE NEGÓCIO)
+-- =========================================================================
+CREATE OR ALTER TRIGGER TRG_VALIDATE_MAX_DISCOUNT
+ON TB_PAYMENTS
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Verifica se algum pagamento inserido ou alterado está violando a regra de desconto máximo
+    IF EXISTS (
+        SELECT 1
+        FROM INSERTED I
+        INNER JOIN TB_RESERVATIONS R ON R.ID = I.ID_RESERVATION
+        INNER JOIN TB_PACKAGES_DATES PD ON PD.ID = R.ID_PACKAGES_DATES
+        INNER JOIN TB_PACKAGES P ON P.ID = PD.ID_PACKAGE
+        LEFT JOIN TB_PROMOTIONS PR1 ON PR1.ID = P.ID_PROMOTION    -- Promoção vinculada ao pacote
+        LEFT JOIN TB_PROMOTIONS PR2 ON PR2.ID = I.ID_PROMOTION    -- Cupom aplicado ao pagamento
+        WHERE (COALESCE(PR1.DISCOUNT_PERCENT, 0) + COALESCE(PR2.DISCOUNT_PERCENT, 0)) > 80
+    )
+    BEGIN
+        RAISERROR('A soma dos descontos das promoções não pode ultrapassar 80%% do valor bruto!', 16, 1)
+        ROLLBACK TRANSACTION
+        RETURN
+    END
 END
 GO

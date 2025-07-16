@@ -148,30 +148,6 @@ SELECT * FROM sys.triggers WHERE parent_class_desc = 'OBJECT_OR_COLUMN' AND OBJE
 -- ===========================================================
 
 INSERT INTO TB_RESERVATIONS (ID_USER, ID_PACKAGES_DATES, RESERVATION_DATE, SITUATION) VALUES
-	('539D77CA-0C61-4A8C-B7C1-09D3EA4F61C4', 'A55B2082-C4BF-4999-A1B1-148833CD2A5B', GETDATE(), 'confirmado'),
-	('897AA4D9-4F45-42D1-AA59-0C6230E8D803', 'EAAD3BCA-9167-4316-890E-504723FB8EA1', GETDATE(), 'confirmado'),
-	('EF64DB05-BCBF-4635-8059-11467CBB2217', '0FF16F99-86AE-4066-ADB4-6094C45A2622', GETDATE(), 'confirmado'),
-	('299F8423-EB5D-40CB-939C-15924D257A3B', 'CE643D9A-6C67-44E6-A78C-634B8452D6A4', GETDATE(), 'confirmado'),
-	('1AB53B66-A0A2-4516-9D7C-1D7F5FA20714', 'B0DFB333-34CE-4B1F-B37A-7BC18F4C115D', GETDATE(), 'confirmado'),
-	('AC5854F4-E71A-4952-A884-1D94D16C3E90', '0575AD61-9D8A-4C62-8004-8ACBB19917E0', GETDATE(), 'confirmado'),
-	('DE0AEA77-F48E-4399-9816-255842F2F4B2', 'A4D6F74D-2F08-41BB-8A57-B636534F2D75', GETDATE(), 'confirmado'),
-	('35B5AD3E-0DEC-4055-902E-2ECF39A4DA26', '3F580A07-D982-4A24-81C7-D5019DF8E659', GETDATE(), 'confirmado'),
-	('5F9A4A80-BCB0-44DD-9F5E-30BA0309B02D', '0F565BED-E6E4-4380-B38D-E057262B8F3A', GETDATE(), 'confirmado'),
-	('3504CEAF-515F-453E-ADEA-34A3D30A6330', 'F89E5740-BA24-4B4A-80E1-E5BA1528D513', GETDATE(), 'confirmado'),
-	('DC9456FD-6F49-4DB6-8ED5-35607079DB1D', 'A55B2082-C4BF-4999-A1B1-148833CD2A5B', GETDATE(), 'confirmado'),
-	('F6096CE5-5D42-4339-967F-3CBBA7FC8169', 'EAAD3BCA-9167-4316-890E-504723FB8EA1', GETDATE(), 'confirmado'),
-	('50D2F525-CECD-43BD-88BA-4CBB65B7541F', '0FF16F99-86AE-4066-ADB4-6094C45A2622', GETDATE(), 'confirmado'),
-	('341FB88B-AF75-4816-B204-5906FFBDBFCC', 'CE643D9A-6C67-44E6-A78C-634B8452D6A4', GETDATE(), 'confirmado'),
-	('DACB2521-AB24-4ED4-9393-5D36DE653B3D', 'B0DFB333-34CE-4B1F-B37A-7BC18F4C115D', GETDATE(), 'confirmado'),
-	('AFDA1E72-0F29-423A-A5AC-5F27FE1BCF15', '0575AD61-9D8A-4C62-8004-8ACBB19917E0', GETDATE(), 'confirmado'),
-	('95583CD8-3828-4003-853E-75FC3337D047', 'A4D6F74D-2F08-41BB-8A57-B636534F2D75', GETDATE(), 'confirmado'),
-	('FA1C6D5F-A296-4A4B-BF8D-76E0C486A110', '3F580A07-D982-4A24-81C7-D5019DF8E659', GETDATE(), 'confirmado'),
-	('C670ABBF-BF15-4AE7-8059-8E6511DC3B0D', '0F565BED-E6E4-4380-B38D-E057262B8F3A', GETDATE(), 'confirmado');
-GO
-
--- Está com erro de propósito, da regra onde reserva só pode está confirmada se o pagamento for aprovado
-
-INSERT INTO TB_RESERVATIONS (ID_USER, ID_PACKAGES_DATES, RESERVATION_DATE, SITUATION) VALUES
 	('539D77CA-0C61-4A8C-B7C1-09D3EA4F61C4', '2FB47260-38D5-46ED-B3A4-06788C6E23DC', GETDATE(), 'PENDENTE'),
 	('897AA4D9-4F45-42D1-AA59-0C6230E8D803', '54D36042-D421-4878-9995-0734D8F1AB7D', GETDATE(), 'PENDENTE'),
 	('EF64DB05-BCBF-4635-8059-11467CBB2217', '1071E3FE-DC37-4841-B975-154B137BBE1A', GETDATE(), 'PENDENTE'),
@@ -223,25 +199,25 @@ GO
 -- Inserindo no TB_RATING com os ID gerados nas reservas
 -- ===========================================================
 INSERT INTO TB_RATINGS (RATE, COMMENT, ID_RESERVE) VALUES 
-	(5, 'Experiência maravilhosa, super recomendo!', '99629741-11CD-47C2-A1B9-020C419A6ABF'),
-	(4, 'Viagem incrível e atendimento excelente.', 'B45F729E-9D27-4C1E-9B0D-0E39CDD6F7D1'),
-	(5, 'Tudo perfeito! Voltarei mais vezes.', '0B4D050B-0684-46EE-B7B6-13A412831DD2'),
-	(3, 'Gostei bastante, mas poderia ter mais opções de passeios.', '2D22E84A-DF7E-4B4F-B91B-1A76972E41C6'),
-	(5, 'Simplesmente inesquecível, parabéns à equipe!', '9EDE2372-52E4-47B2-BEE3-214C46DAFF95'),
-	(4, 'Muito bom, paisagens lindas, recomendo.', '0D7DAEF9-EA96-4680-862A-2DFDF1F2C506'),
-	(5, 'Atendimento nota 10, superou expectativas.', '7B70E677-27F4-4E38-A106-2E3B8A2239E6'),
-	(4, 'Passeios bem organizados e guias atenciosos.', 'F1736279-F226-4AA8-A06C-447D371A3F47'),
-	(5, 'Viagem dos sonhos, só gratidão!', '532D4E47-16B4-4FE8-8E95-44A5E4FE0F80'),
-	(3, 'Tudo certo, mas o transporte atrasou um pouco.', '9128F77A-5549-48A2-95A1-5478CA44AED5'),
-	(4, 'Equipe prestativa e roteiro bem elaborado.', '40C25383-6580-4FEB-82F3-6D57FDF66713'),
-	(5, 'Amei cada momento, recomendo para todos!', '015E5414-F301-45FE-9DCE-9B07EFC88BAE'),
-	(5, 'Foi tudo incrível! Quero repetir logo.', 'B1F974A0-E989-4AB0-ABC1-ACE35091DB43'),
-	(4, 'Ótima experiência, lugares lindos.', '7C1F1DB3-5EFF-4708-9A72-B64E5683D96E'),
-	(5, 'Organização impecável, parabéns!', '49B15A92-14C1-4AD2-8028-BF1F911C0D8F'),
-	(3, 'Gostei, mas esperava mais opções de lazer.', '04163FDD-F8D1-4BAB-9A20-C55463901178'),
-	(4, 'Muito bom, atendimento excelente.', '8521B334-62D9-4B7B-8BFC-C6A108CF4AFA'),
-	(5, 'Viagem perfeita, só elogios!', 'D15803D8-2D37-4A20-A50B-ED95E45EE6D4'),
-	(5, 'Tudo maravilhoso, do início ao fim.', '0A95A0FE-9255-4ADE-9906-EDD933721BF4');
+	(5, 'Experiência maravilhosa, super recomendo!', 'D53C5594-0CF8-4ED3-BFA9-00B4387A41F8'),
+	(4, 'Viagem incrível e atendimento excelente.', 'BB84D9E7-BE57-4DBE-A0A5-05E55FE55CA1'),
+	(5, 'Tudo perfeito! Voltarei mais vezes.', '9A62F17C-AA60-4A25-B1A1-16371858CE05'),
+	(3, 'Gostei bastante, mas poderia ter mais opções de passeios.', 'FA2AD9AE-CBCD-4EE4-A391-22EE8B13718B'),
+	(5, 'Simplesmente inesquecível, parabéns à equipe!', 'B26E80DC-1FEA-4EF6-BC28-31A12D90C0F1'),
+	(4, 'Muito bom, paisagens lindas, recomendo.', '145E6EBB-2507-4B8A-82B4-3B62BD9D57F5'),
+	(5, 'Atendimento nota 10, superou expectativas.', '8C442A9C-3C8E-476C-B79D-429E0CC5C43D'),
+	(4, 'Passeios bem organizados e guias atenciosos.', '009EDF82-5A1B-4618-ACEE-49B1AD9AC960'),
+	(5, 'Viagem dos sonhos, só gratidão!', '4AC9F590-10B1-4F51-95E4-4F3E685C6223'),
+	(3, 'Tudo certo, mas o transporte atrasou um pouco.', '859A0674-A7AD-4F5F-9EEC-6D0EA8FB3C15'),
+	(4, 'Equipe prestativa e roteiro bem elaborado.', 'E8E10833-4795-49E1-9535-7BC59F25470C'),
+	(5, 'Amei cada momento, recomendo para todos!', '51335591-8ABB-4665-A0B2-86154B8FEF0E'),
+	(5, 'Foi tudo incrível! Quero repetir logo.', 'FA519ACC-80F3-440B-8C7A-A5545C22F8B8'),
+	(4, 'Ótima experiência, lugares lindos.', '7C785BA2-88C5-4607-8D54-AAA08B3BEE36'),
+	(5, 'Organização impecável, parabéns!', '03047033-BEA8-46F2-A676-B64C8EDDA44C'),
+	(3, 'Gostei, mas esperava mais opções de lazer.', 'F0015482-5F76-431C-80E7-CE87F3CADF5E'),
+	(4, 'Muito bom, atendimento excelente.', 'C63797D7-907A-43E4-95F6-D366E1B3DF91'),
+	(5, 'Viagem perfeita, só elogios!', '1C459550-DA63-4386-9050-E35D088C08BE'),
+	(5, 'Tudo maravilhoso, do início ao fim.', 'CFBD8532-1328-4221-B9AA-E447901A10E6');
 GO
 
 SELECT * FROM TB_RATINGS
@@ -252,19 +228,14 @@ GO
 -- ===========================================================
 
 INSERT INTO TB_PAYMENTS (
-    ID, VALUE_PAID, PAYMENT_METHOD, PAYMENT_STATUS, PAYMENT_APPROVED_AT, TAX, DISCOUNT, DISCOUNT_REASON, 
-    INSTALLMENT, INSTALLMENT_AMOUNT, CREATED_AT, UPDATED_AT, ID_RESERVATION
+    VALUE_PAID, PAYMENT_METHOD, PAYMENT_STATUS, TAX,INSTALLMENT, INSTALLMENT_AMOUNT, ID_RESERVATION
 ) VALUES
-	(NEWID(), 1200.00, 'crédito', 'aprovado', GETDATE(), 60.00, 100.00, 'Cupom BlackFriday', 3, 400.00, GETDATE(), GETDATE(), '99629741-11CD-47C2-A1B9-020C419A6ABF'),
-	(NEWID(), 850.00, 'pix', 'aprovado', GETDATE(), 42.00, NULL, NULL, NULL, NULL, GETDATE(), GETDATE(), 'B45F729E-9D27-4C1E-9B0D-0E39CDD6F7D1'),
-	(NEWID(), 980.00, 'débito', 'aprovado', GETDATE(), 49.00, 20.00, 'Desconto fidelidade', NULL, NULL, GETDATE(), GETDATE(), '0B4D050B-0684-46EE-B7B6-13A412831DD2'),
-	(NEWID(), 2000.00, 'boleto', 'pendente', NULL, NULL, NULL, NULL, NULL, NULL, GETDATE(), GETDATE(), '2D22E84A-DF7E-4B4F-B91B-1A76972E41C6'),
-	(NEWID(), 3000.00, 'pix', 'aprovado', GETDATE(), 120.00, 250.00, 'Cupom especial', 4, 750.00, GETDATE(), GETDATE(), '9EDE2372-52E4-47B2-BEE3-214C46DAFF95'),
-	(NEWID(), 750.00, 'crédito', 'aprovado', GETDATE(), NULL, NULL, NULL, 1, 750.00, GETDATE(), GETDATE(), '0D7DAEF9-EA96-4680-862A-2DFDF1F2C506'),
-	(NEWID(), 1600.00, 'crédito', 'aprovado', GETDATE(), NULL, 150.00, 'Promoção', 2, 800.00, GETDATE(), GETDATE(), '7B70E677-27F4-4E38-A106-2E3B8A2239E6'),
-	(NEWID(), 2200.00, 'boleto', 'pendente', NULL, NULL, NULL, NULL, NULL, NULL, GETDATE(), GETDATE(), 'F1736279-F226-4AA8-A06C-447D371A3F47'),
-	(NEWID(), 500.00, 'débito', 'aprovado', GETDATE(), 25.00, NULL, NULL, 1, 500.00, GETDATE(), GETDATE(), '532D4E47-16B4-4FE8-8E95-44A5E4FE0F80'),
-	(NEWID(), 3100.00, 'pix', 'cancelado', NULL, NULL, NULL, NULL, NULL, NULL, GETDATE(), GETDATE(), '9128F77A-5549-48A2-95A1-5478CA44AED5');
+	(0, 'crédito', 'aprovado', 0.00, 0 , 0, '859A0674-A7AD-4F5F-9EEC-6D0EA8FB3C15')
+GO
+
+UPDATE TB_PAYMENTS
+SET VALUE_PAID = 6960
+WHERE ID = '55294BD1-555B-4F1F-8409-AE7A9AF78463'
 GO
 
 SELECT * FROM TB_PAYMENTS;
@@ -273,27 +244,72 @@ SELECT * FROM TB_PAYMENTS;
 -- Inserindo 20 viajantes, um para cada reserva, respeitando as constraints de email e CPF
 -- ===========================================================
 INSERT INTO TB_TRAVELERS (ID, NAME, EMAIL, CPF, BIRTHDATE, ID_RESERVATION, CREATED_AT, UPDATED_AT) VALUES
-	(NEWID(), 'Ana Paula Souza', 'anapaula.souza1@email.com', '123.456.789-00', '1990-03-15', '99629741-11CD-47C2-A1B9-020C419A6ABF', GETDATE(), GETDATE()),
-	(NEWID(), 'Bruno Henrique Lima', 'bruno.lima2@email.com', '234.567.890-11', '1988-07-23', 'B45F729E-9D27-4C1E-9B0D-0E39CDD6F7D1', GETDATE(), GETDATE()),
-	(NEWID(), 'Carla Regina Silva', 'carla.silva3@email.com', '345.678.901-22', '1995-11-12', '0B4D050B-0684-46EE-B7B6-13A412831DD2', GETDATE(), GETDATE()),
-	(NEWID(), 'Daniel Souza', 'daniel.souza4@email.com', '456.789.012-33', '1983-01-22', '2D22E84A-DF7E-4B4F-B91B-1A76972E41C6', GETDATE(), GETDATE()),
-	(NEWID(), 'Elisa Andrade', 'elisa.andrade5@email.com', '567.890.123-44', '1992-05-10', '9EDE2372-52E4-47B2-BEE3-214C46DAFF95', GETDATE(), GETDATE()),
-	(NEWID(), 'Felipe Oliveira', 'felipe.oliveira6@email.com', '678.901.234-55', '1987-09-18', '0D7DAEF9-EA96-4680-862A-2DFDF1F2C506', GETDATE(), GETDATE()),
-	(NEWID(), 'Gabriela Araújo', 'gabriela.araujo7@email.com', '789.012.345-66', '2000-12-30', '7B70E677-27F4-4E38-A106-2E3B8A2239E6', GETDATE(), GETDATE()),
-	(NEWID(), 'Henrique Cardoso', 'henrique.cardoso8@email.com', '890.123.456-77', '1985-06-27', 'F1736279-F226-4AA8-A06C-447D371A3F47', GETDATE(), GETDATE()),
-	(NEWID(), 'Isabela Martins', 'isabela.martins9@email.com', '901.234.567-88', '1998-02-14', '532D4E47-16B4-4FE8-8E95-44A5E4FE0F80', GETDATE(), GETDATE()),
-	(NEWID(), 'João Victor Ramos', 'joao.ramos10@email.com', '012.345.678-99', '1991-10-09', '9128F77A-5549-48A2-95A1-5478CA44AED5', GETDATE(), GETDATE()),
-	(NEWID(), 'Karen Dias', 'karen.dias11@email.com', '111.222.333-44', '1996-04-05', '40C25383-6580-4FEB-82F3-6D57FDF66713', GETDATE(), GETDATE()),
-	(NEWID(), 'Leonardo Mendes', 'leonardo.mendes12@email.com', '222.333.444-55', '1982-08-16', '015E5414-F301-45FE-9DCE-9B07EFC88BAE', GETDATE(), GETDATE()),
-	(NEWID(), 'Marina Tavares', 'marina.tavares13@email.com', '333.444.555-66', '1997-07-21', 'B1F974A0-E989-4AB0-ABC1-ACE35091DB43', GETDATE(), GETDATE()),
-	(NEWID(), 'Nicolas Farias', 'nicolas.farias14@email.com', '444.555.666-77', '1993-12-11', '7C1F1DB3-5EFF-4708-9A72-B64E5683D96E', GETDATE(), GETDATE()),
-	(NEWID(), 'Olívia Cunha', 'olivia.cunha15@email.com', '555.666.777-88', '1989-03-03', '49B15A92-14C1-4AD2-8028-BF1F911C0D8F', GETDATE(), GETDATE()),
-	(NEWID(), 'Paulo Noronha', 'paulo.noronha16@email.com', '666.777.888-99', '1994-10-25', '04163FDD-F8D1-4BAB-9A20-C55463901178', GETDATE(), GETDATE()),
-	(NEWID(), 'Renata Gouveia', 'renata.gouveia17@email.com', '777.888.999-00', '1986-01-30', '8521B334-62D9-4B7B-8BFC-C6A108CF4AFA', GETDATE(), GETDATE()),
-	(NEWID(), 'Samuel Rocha', 'samuel.rocha18@email.com', '888.999.000-11', '1999-05-13', 'D15803D8-2D37-4A20-A50B-ED95E45EE6D4', GETDATE(), GETDATE()),
-	(NEWID(), 'Tatiane Amaral', 'tatiane.amaral19@email.com', '999.000.111-22', '1984-11-18', '0A95A0FE-9255-4ADE-9906-EDD933721BF4', GETDATE(), GETDATE()),
-	(NEWID(), 'Vinícius Prado', 'vinicius.prado20@email.com', '000.111.222-33', '1990-06-02', '015E5414-F301-45FE-9DCE-9B07EFC88BAE', GETDATE(), GETDATE());
+	(NEWID(), 'Ana Paula Souza', 'anapaula.souza1@email.com', '123.456.789-00', '1990-03-15', '859A0674-A7AD-4F5F-9EEC-6D0EA8FB3C15', GETDATE(), GETDATE()),
+	(NEWID(), 'Bruno Henrique Lima', 'bruno.lima2@email.com', '234.567.890-11', '1988-07-23', '859A0674-A7AD-4F5F-9EEC-6D0EA8FB3C15', GETDATE(), GETDATE()),
+	(NEWID(), 'Carla Regina Silva', 'carla.silva3@email.com', '345.678.901-22', '1995-11-12', '859A0674-A7AD-4F5F-9EEC-6D0EA8FB3C15', GETDATE(), GETDATE())
 GO
 
-SELECT * FROM TB_TRAVELERS;
+SELECT * FROM TB_TRAVELERS
+GO
+
+--	(NEWID(), 'Daniel Souza', 'daniel.souza4@email.com', '456.789.012-33', '1983-01-22', '2D22E84A-DF7E-4B4F-B91B-1A76972E41C6', GETDATE(), GETDATE()),
+--	(NEWID(), 'Elisa Andrade', 'elisa.andrade5@email.com', '567.890.123-44', '1992-05-10', '9EDE2372-52E4-47B2-BEE3-214C46DAFF95', GETDATE(), GETDATE()),
+--	(NEWID(), 'Felipe Oliveira', 'felipe.oliveira6@email.com', '678.901.234-55', '1987-09-18', '0D7DAEF9-EA96-4680-862A-2DFDF1F2C506', GETDATE(), GETDATE()),
+--	(NEWID(), 'Gabriela Araújo', 'gabriela.araujo7@email.com', '789.012.345-66', '2000-12-30', '7B70E677-27F4-4E38-A106-2E3B8A2239E6', GETDATE(), GETDATE()),
+--	(NEWID(), 'Henrique Cardoso', 'henrique.cardoso8@email.com', '890.123.456-77', '1985-06-27', 'F1736279-F226-4AA8-A06C-447D371A3F47', GETDATE(), GETDATE()),
+--	(NEWID(), 'Isabela Martins', 'isabela.martins9@email.com', '901.234.567-88', '1998-02-14', '532D4E47-16B4-4FE8-8E95-44A5E4FE0F80', GETDATE(), GETDATE()),
+--	(NEWID(), 'João Victor Ramos', 'joao.ramos10@email.com', '012.345.678-99', '1991-10-09', '9128F77A-5549-48A2-95A1-5478CA44AED5', GETDATE(), GETDATE()),
+--	(NEWID(), 'Karen Dias', 'karen.dias11@email.com', '111.222.333-44', '1996-04-05', '40C25383-6580-4FEB-82F3-6D57FDF66713', GETDATE(), GETDATE()),
+--	(NEWID(), 'Leonardo Mendes', 'leonardo.mendes12@email.com', '222.333.444-55', '1982-08-16', '015E5414-F301-45FE-9DCE-9B07EFC88BAE', GETDATE(), GETDATE()),
+--	(NEWID(), 'Marina Tavares', 'marina.tavares13@email.com', '333.444.555-66', '1997-07-21', 'B1F974A0-E989-4AB0-ABC1-ACE35091DB43', GETDATE(), GETDATE()),
+--	(NEWID(), 'Nicolas Farias', 'nicolas.farias14@email.com', '444.555.666-77', '1993-12-11', '7C1F1DB3-5EFF-4708-9A72-B64E5683D96E', GETDATE(), GETDATE()),
+--	(NEWID(), 'Olívia Cunha', 'olivia.cunha15@email.com', '555.666.777-88', '1989-03-03', '49B15A92-14C1-4AD2-8028-BF1F911C0D8F', GETDATE(), GETDATE()),
+--	(NEWID(), 'Paulo Noronha', 'paulo.noronha16@email.com', '666.777.888-99', '1994-10-25', '04163FDD-F8D1-4BAB-9A20-C55463901178', GETDATE(), GETDATE()),
+--	(NEWID(), 'Renata Gouveia', 'renata.gouveia17@email.com', '777.888.999-00', '1986-01-30', '8521B334-62D9-4B7B-8BFC-C6A108CF4AFA', GETDATE(), GETDATE()),
+--	(NEWID(), 'Samuel Rocha', 'samuel.rocha18@email.com', '888.999.000-11', '1999-05-13', 'D15803D8-2D37-4A20-A50B-ED95E45EE6D4', GETDATE(), GETDATE()),
+--	(NEWID(), 'Tatiane Amaral', 'tatiane.amaral19@email.com', '999.000.111-22', '1984-11-18', '0A95A0FE-9255-4ADE-9906-EDD933721BF4', GETDATE(), GETDATE()),
+--	(NEWID(), 'Vinícius Prado', 'vinicius.prado20@email.com', '000.111.222-33', '1990-06-02', '015E5414-F301-45FE-9DCE-9B07EFC88BAE', GETDATE(), GETDATE());
+--GO
+
+-- ===========================================================
+-- Inserindo DUAS promoções, uma ligada TB_PAYMENTS e outra TB_PACKAGES
+-- ===========================================================
+-- Promoção sazonal (exemplo: promoção de inverno)
+INSERT INTO TB_PROMOTIONS (
+    CODE, NAME, DESCRIPTION, START_DATE, END_DATE, DISCOUNT_PERCENT
+)
+VALUES (
+    NULL, -- promoção sazonal normalmente não tem código
+    'Winter Sale',
+    'Promoção sazonal de inverno com desconto especial.',
+    '2025-06-01', -- início da validade
+    '2025-08-31', -- fim da validade
+    20.0 -- 20% de desconto
+);
+
+-- Promoção por cupom (exemplo: cupom "SUPER40")
+INSERT INTO TB_PROMOTIONS (
+    CODE, NAME, DESCRIPTION, START_DATE, END_DATE, DISCOUNT_PERCENT
+)
+VALUES (
+    'SUPER40',
+    'Super40',
+    'Cupom promocional para clientes especiais, 40% de desconto.',
+    '2025-07-01', -- início da validade
+    '2025-07-31', -- fim da validade
+    40.0 -- 40% de desconto
+);
+GO
+
+
+SELECT * FROM TB_PROMOTIONS
+GO
+
+-- Exemplos de como precisar funcionar o insert, ele já tem que estar o valor corretamente calculado
+UPDATE TB_PAYMENTS 
+SET ID_PROMOTION = '59F82C6C-0232-4125-B174-46D48CD2D3E2', VALUE_PAID = 3828, TAX = 10
+WHERE ID = '55294BD1-555B-4F1F-8409-AE7A9AF78463'
+GO
+
+
 

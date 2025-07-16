@@ -220,7 +220,7 @@ CREATE OR ALTER VIEW VW_TRAVELERS_COUNT_BY_PACKAGE_DATE AS
 GO
 
 -- SELECT PARA EXTRAIR AS INFORMAÇÕES
-SELECT * FROM VW_TRAVELERS_COUNT_BY_PACKAGE_DATE WHERE START_DATE = '2025-08-01'
+SELECT * FROM VW_TRAVELERS_COUNT_BY_PACKAGE_DATE 
 GO
 
 -- =========================================================================
@@ -331,3 +331,31 @@ GO
 
 
 SELECT * FROM VW_AVAILABLE_RESERVATIONS_BY_DATE;
+GO
+
+
+-- =========================================================================
+-- VIEW: VW_RESERVATIONS_WITH_PACKAGE
+-- OBJETIVO: EXIBIR TODAS AS RESERVAS, INCLUINDO TÍTULO E ID DO PACOTE
+-- =========================================================================
+CREATE OR ALTER VIEW VW_RESERVATIONS_WITH_PACKAGE AS
+    SELECT
+        R.ID                   AS RESERVATION_ID,
+        P.ID                   AS PACKAGE_ID,
+        P.PRICE                AS PRICE,
+        P.TITLE                AS PACKAGE_TITLE,
+        R.RESERVATION_DATE     AS RESERVATION_DATE,
+        R.SITUATION            AS SITUATION,
+        R.CANCEL_DATE          AS CANCEL_DATE,
+        (
+            SELECT COUNT(*) 
+            FROM TB_TRAVELERS T
+            WHERE T.ID_RESERVATION = R.ID
+        ) AS QTD_VIAJANTES
+    FROM TB_RESERVATIONS R
+    INNER JOIN TB_PACKAGES_DATES PD ON R.ID_PACKAGES_DATES = PD.ID
+    INNER JOIN TB_PACKAGES P ON PD.ID_PACKAGE = P.ID
+GO
+
+SELECT * FROM VW_RESERVATIONS_WITH_PACKAGE
+GO
