@@ -458,44 +458,71 @@ ON TB_PAYMENTS
 AFTER INSERT, UPDATE
 AS
 BEGIN
-    -- Verifica cada pagamento alterado/inserido
-    IF EXISTS (
-        SELECT 1
-        FROM INSERTED I
-        INNER JOIN TB_RESERVATIONS R ON R.ID = I.ID_RESERVATION
-        INNER JOIN TB_PACKAGES_DATES PD ON PD.ID = R.ID_PACKAGES_DATES
-        INNER JOIN TB_PACKAGES P ON P.ID = PD.ID_PACKAGE
-        LEFT JOIN TB_PROMOTIONS PR1 ON PR1.ID = P.ID_PROMOTION
-        LEFT JOIN TB_PROMOTIONS PR2 ON PR2.ID = I.ID_PROMOTION
-        CROSS APPLY (
-            SELECT COUNT(*) AS QTD_VIAJANTES
-            FROM TB_TRAVELERS T
-            WHERE T.ID_RESERVATION = R.ID
-        ) QV
-        WHERE
-            ABS(
-                I.VALUE_PAID -
-                (
-                    (P.PRICE * QV.QTD_VIAJANTES)
-                    * (1 
-                        - (
-                            COALESCE(PR1.DISCOUNT_PERCENT, 0)
-                            + COALESCE(PR2.DISCOUNT_PERCENT, 0)
-                            + CASE WHEN I.PAYMENT_METHOD = 'pix' THEN 5 ELSE 0 END
-                          ) / 100.0
-                      )
-                    * (1 + COALESCE(I.TAX, 0) / 100.0)
-                )
-            ) > 0.01
-    )
+    -- Declara variáveis para capturar os valores
+    DECLARE @ValuePaid DECIMAL(10,2)
+    DECLARE @ExpectedValue DECIMAL(10,2)
+    DECLARE @ReservationId UNIQUEIDENTIFIER
+    DECLARE @PaymentId UNIQUEIDENTIFIER
+
+    -- Verifica cada pagamento alterado/inserido e calcula o valor esperado
+    SELECT TOP 1
+        @ValuePaid = I.VALUE_PAID,
+        @ExpectedValue = (
+            (P.PRICE * (QV.QTD_VIAJANTES + 1)) -- +1 para incluir o usuário principal
+            * (1 - (
+                COALESCE(PR1.DISCOUNT_PERCENT, 0)
+                + COALESCE(PR2.DISCOUNT_PERCENT, 0)
+                + CASE WHEN I.PAYMENT_METHOD = 'PIX' THEN 5 ELSE 0 END
+              ) / 100.0)
+            * (1 + COALESCE(I.TAX, 0) / 100.0)
+        ),
+        @ReservationId = R.ID,
+        @PaymentId = I.ID
+    FROM INSERTED I
+    INNER JOIN TB_RESERVATIONS R ON R.ID = I.ID_RESERVATION
+    INNER JOIN TB_PACKAGES_DATES PD ON PD.ID = R.ID_PACKAGES_DATES
+    INNER JOIN TB_PACKAGES P ON P.ID = PD.ID_PACKAGE
+    LEFT JOIN TB_PROMOTIONS PR1 ON PR1.ID = P.ID_PROMOTION
+    LEFT JOIN TB_PROMOTIONS PR2 ON PR2.ID = I.ID_PROMOTION
+    CROSS APPLY (
+        SELECT COUNT(*) AS QTD_VIAJANTES
+        FROM TB_TRAVELERS T
+        WHERE T.ID_RESERVATION = R.ID
+    ) QV
+    WHERE
+        ABS(
+            I.VALUE_PAID -
+            (
+                (P.PRICE * (QV.QTD_VIAJANTES + 1)) -- +1 para incluir o usuário principal
+                * (1 - (
+                    COALESCE(PR1.DISCOUNT_PERCENT, 0)
+                    + COALESCE(PR2.DISCOUNT_PERCENT, 0)
+                    + CASE WHEN I.PAYMENT_METHOD = 'PIX' THEN 5 ELSE 0 END
+                  ) / 100.0)
+                * (1 + COALESCE(I.TAX, 0) / 100.0)
+            )
+        ) > 0.01
+
+    -- Se encontrou alguma discrepância, exibe mensagem detalhada e faz rollback
+    IF @@ROWCOUNT > 0
     BEGIN
-        RAISERROR('O VALUE_PAID está diferente do valor calculado considerando promoções, taxa, quantidade de viajantes e desconto Pix!', 16, 1)
+        DECLARE @ErrorMessage NVARCHAR(1000)
+        
+        -- Constrói a mensagem concatenando as strings diretamente
+        SET @ErrorMessage = 
+            'VALOR INCORRETO! ' +
+            'Payment ID: ' + CAST(@PaymentId AS NVARCHAR(36)) + ' | ' +
+            'Reservation ID: ' + CAST(@ReservationId AS NVARCHAR(36)) + ' | ' +
+            'Valor Pago: R$ ' + FORMAT(@ValuePaid, '0.00') + ' | ' +
+            'Valor Esperado: R$ ' + FORMAT(@ExpectedValue, '0.00') + ' | ' +
+            'Diferença: R$ ' + FORMAT(ABS(@ValuePaid - @ExpectedValue), '0.00')
+        
+        RAISERROR(@ErrorMessage, 16, 1)
         ROLLBACK TRANSACTION
         RETURN
     END
 END
 GO
-
 
 -- =========================================================================
 -- TRIGGER 20: TRG_VALIDATE_MAX_DISCOUNT
