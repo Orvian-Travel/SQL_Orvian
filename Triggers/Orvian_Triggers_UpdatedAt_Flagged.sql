@@ -17,7 +17,7 @@ BEGIN
         EXEC sp_set_session_context @key = N'UPDATED_AT_USERS_TRIGGERED', @value = 1;
 
         UPDATE TB_USERS
-        SET UPDATED_AT = GETDATE()
+        SET UPDATED_AT = GETUTCDATE()
         FROM TB_USERS U INNER JOIN INSERTED I ON U.ID = I.ID;
 
         EXEC sp_set_session_context @key = N'UPDATED_AT_USERS_TRIGGERED', @value = NULL;
@@ -38,7 +38,7 @@ BEGIN
         EXEC sp_set_session_context @key = N'UPDATED_AT_PAYMENTS_TRIGGERED', @value = 1;
 
         UPDATE TB_PAYMENTS
-        SET UPDATED_AT = GETDATE()
+        SET UPDATED_AT = GETUTCDATE()
         FROM TB_PAYMENTS P INNER JOIN INSERTED I ON P.ID = I.ID;
 
         EXEC sp_set_session_context @key = N'UPDATED_AT_PAYMENTS_TRIGGERED', @value = NULL;
@@ -59,7 +59,7 @@ BEGIN
         EXEC sp_set_session_context @key = N'UPDATED_AT_RESERVATIONS_TRIGGERED', @value = 1;
 
         UPDATE TB_RESERVATIONS
-        SET UPDATED_AT = GETDATE()
+        SET UPDATED_AT = GETUTCDATE()
         FROM TB_RESERVATIONS R INNER JOIN INSERTED I ON R.ID = I.ID;
 
         EXEC sp_set_session_context @key = N'UPDATED_AT_RESERVATIONS_TRIGGERED', @value = NULL;
@@ -80,7 +80,7 @@ BEGIN
         EXEC sp_set_session_context @key = N'UPDATED_AT_RATINGS_TRIGGERED', @value = 1;
 
         UPDATE TB_RATINGS
-        SET UPDATED_AT = GETDATE()
+        SET UPDATED_AT = GETUTCDATE()
         FROM TB_RATINGS R INNER JOIN INSERTED I ON R.ID = I.ID;
 
         EXEC sp_set_session_context @key = N'UPDATED_AT_RATINGS_TRIGGERED', @value = NULL;
@@ -101,7 +101,7 @@ BEGIN
         EXEC sp_set_session_context @key = N'UPDATED_AT_MEDIAS_TRIGGERED', @value = 1;
 
         UPDATE TB_MEDIAS
-        SET UPDATED_AT = GETDATE()
+        SET UPDATED_AT = GETUTCDATE()
         FROM TB_MEDIAS M INNER JOIN INSERTED I ON M.ID = I.ID;
 
         EXEC sp_set_session_context @key = N'UPDATED_AT_MEDIAS_TRIGGERED', @value = NULL;
@@ -122,7 +122,7 @@ BEGIN
         EXEC sp_set_session_context @key = N'UPDATED_AT_TRAVELERS_TRIGGERED', @value = 1;
 
         UPDATE TB_TRAVELERS
-        SET UPDATED_AT = GETDATE()
+        SET UPDATED_AT = GETUTCDATE()
         FROM TB_TRAVELERS T INNER JOIN INSERTED I ON T.ID = I.ID;
 
         EXEC sp_set_session_context @key = N'UPDATED_AT_TRAVELERS_TRIGGERED', @value = NULL;
@@ -143,7 +143,7 @@ BEGIN
         EXEC sp_set_session_context @key = N'UPDATED_AT_PACKAGES_DATES_TRIGGERED', @value = 1;
 
         UPDATE TB_PACKAGES_DATES
-        SET UPDATED_AT = GETDATE()
+        SET UPDATED_AT = GETUTCDATE()
         FROM TB_PACKAGES_DATES PD INNER JOIN INSERTED I ON PD.ID = I.ID;
 
         EXEC sp_set_session_context @key = N'UPDATED_AT_PACKAGES_DATES_TRIGGERED', @value = NULL;
@@ -164,7 +164,7 @@ BEGIN
         EXEC sp_set_session_context @key = N'UPDATED_AT_PACKAGES_TRIGGERED', @value = 1;
 
         UPDATE TB_PACKAGES
-        SET UPDATED_AT = GETDATE()
+        SET UPDATED_AT = GETUTCDATE()
         FROM TB_PACKAGES P INNER JOIN INSERTED I ON P.ID = I.ID;
 
         EXEC sp_set_session_context @key = N'UPDATED_AT_PACKAGES_TRIGGERED', @value = NULL;
@@ -185,7 +185,7 @@ BEGIN
         EXEC sp_set_session_context @key = N'UPDATED_AT_PROMOTIONS_TRIGGERED', @value = 1;
 
         UPDATE TB_PROMOTIONS
-        SET UPDATED_AT = GETDATE()
+        SET UPDATED_AT = GETUTCDATE()
         FROM TB_PROMOTIONS P INNER JOIN INSERTED I ON P.ID = I.ID;
 
         EXEC sp_set_session_context @key = N'UPDATED_AT_PROMOTIONS_TRIGGERED', @value = NULL;

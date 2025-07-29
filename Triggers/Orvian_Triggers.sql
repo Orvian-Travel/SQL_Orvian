@@ -9,7 +9,7 @@ AFTER UPDATE
 AS BEGIN
     SET NOCOUNT ON
     UPDATE TB_PAYMENTS
-SET PAYMENT_APPROVED_AT = GETDATE()
+SET PAYMENT_APPROVED_AT = GETUTCDATE()
 FROM TB_PAYMENTS P 
     INNER JOIN INSERTED I ON P.ID = I.ID
     INNER JOIN DELETED D ON D.ID = I.ID
@@ -51,7 +51,7 @@ ON TB_PACKAGES_DATES
 AFTER INSERT, UPDATE
 AS
 BEGIN
-    IF EXISTS (SELECT 1 FROM inserted WHERE START_DATE < CAST(GETDATE() AS DATE))
+    IF EXISTS (SELECT 1 FROM inserted WHERE START_DATE < CAST(GETUTCDATE() AS DATE))
     BEGIN
         RAISERROR('Não é possível criar pacotes com data de início no passado', 16, 1)
         ROLLBACK TRANSACTION
@@ -184,7 +184,7 @@ BEGIN
         SELECT 1 
         FROM deleted d
         INNER JOIN TB_PACKAGES_DATES pd ON d.ID = pd.ID_PACKAGE
-        WHERE pd.START_DATE >= CAST(GETDATE() AS DATE)
+        WHERE pd.START_DATE >= CAST(GETUTCDATE() AS DATE)
     )
     BEGIN
         RAISERROR('Não é possível excluir pacotes que possuem datas futuras cadastradas', 16, 1)
@@ -367,7 +367,7 @@ BEGIN
         SELECT 1
         FROM INSERTED I
         INNER JOIN TB_PACKAGES_DATES PD ON I.ID_PACKAGES_DATES = PD.ID
-        WHERE PD.[START_DATE] < CAST(GETDATE() AS DATE)
+        WHERE PD.[START_DATE] < CAST(GETUTCDATE() AS DATE)
     )
     BEGIN
         RAISERROR('NÃO É PERMITIDO RESERVAR PARA UMA DATA JÁ PASSADA.', 16, 1)
@@ -437,7 +437,7 @@ BEGIN
     SET NOCOUNT ON;
 
     UPDATE TB_RESERVATIONS
-    SET CANCEL_DATE = GETDATE()
+    SET CANCEL_DATE = GETUTCDATE()
     FROM TB_RESERVATIONS R
         INNER JOIN INSERTED I ON R.ID = I.ID
         INNER JOIN DELETED D ON D.ID = I.ID
@@ -463,19 +463,20 @@ BEGIN
     DECLARE @ExpectedValue DECIMAL(10,2)
     DECLARE @ReservationId UNIQUEIDENTIFIER
     DECLARE @PaymentId UNIQUEIDENTIFIER
+    DECLARE @Difference DECIMAL(10,2)
 
     -- Verifica cada pagamento alterado/inserido e calcula o valor esperado
     SELECT TOP 1
         @ValuePaid = I.VALUE_PAID,
-        @ExpectedValue = (
-            (P.PRICE * (QV.QTD_VIAJANTES + 1)) -- +1 para incluir o usuário principal
+        @ExpectedValue = ROUND((
+            (P.PRICE * QV.QTD_VIAJANTES) -- APENAS travelers, SEM +1 do usuário
             * (1 - (
                 COALESCE(PR1.DISCOUNT_PERCENT, 0)
                 + COALESCE(PR2.DISCOUNT_PERCENT, 0)
                 + CASE WHEN I.PAYMENT_METHOD = 'PIX' THEN 5 ELSE 0 END
               ) / 100.0)
             * (1 + COALESCE(I.TAX, 0) / 100.0)
-        ),
+        ), 2),
         @ReservationId = R.ID,
         @PaymentId = I.ID
     FROM INSERTED I
@@ -485,37 +486,27 @@ BEGIN
     LEFT JOIN TB_PROMOTIONS PR1 ON PR1.ID = P.ID_PROMOTION
     LEFT JOIN TB_PROMOTIONS PR2 ON PR2.ID = I.ID_PROMOTION
     CROSS APPLY (
-        SELECT COUNT(*) AS QTD_VIAJANTES
+        SELECT COUNT(*) AS QTD_VIAJANTES -- APENAS travelers, sem +1
         FROM TB_TRAVELERS T
         WHERE T.ID_RESERVATION = R.ID
     ) QV
-    WHERE
-        ABS(
-            I.VALUE_PAID -
-            (
-                (P.PRICE * (QV.QTD_VIAJANTES + 1)) -- +1 para incluir o usuário principal
-                * (1 - (
-                    COALESCE(PR1.DISCOUNT_PERCENT, 0)
-                    + COALESCE(PR2.DISCOUNT_PERCENT, 0)
-                    + CASE WHEN I.PAYMENT_METHOD = 'PIX' THEN 5 ELSE 0 END
-                  ) / 100.0)
-                * (1 + COALESCE(I.TAX, 0) / 100.0)
-            )
-        ) > 0.01
 
-    -- Se encontrou alguma discrepância, exibe mensagem detalhada e faz rollback
-    IF @@ROWCOUNT > 0
+    -- Calcula a diferença
+    SET @Difference = ABS(@ValuePaid - @ExpectedValue)
+
+    -- Se encontrou alguma discrepância maior que 1 centavo, exibe mensagem detalhada e faz rollback
+    IF @Difference > 0.01
     BEGIN
         DECLARE @ErrorMessage NVARCHAR(1000)
         
-        -- Constrói a mensagem concatenando as strings diretamente
         SET @ErrorMessage = 
             'VALOR INCORRETO! ' +
             'Payment ID: ' + CAST(@PaymentId AS NVARCHAR(36)) + ' | ' +
             'Reservation ID: ' + CAST(@ReservationId AS NVARCHAR(36)) + ' | ' +
             'Valor Pago: R$ ' + FORMAT(@ValuePaid, '0.00') + ' | ' +
             'Valor Esperado: R$ ' + FORMAT(@ExpectedValue, '0.00') + ' | ' +
-            'Diferença: R$ ' + FORMAT(ABS(@ValuePaid - @ExpectedValue), '0.00')
+            'Diferença: R$ ' + FORMAT(@Difference, '0.00') + ' | ' +
+            'QTD_TRAVELERS: ' + CAST((SELECT COUNT(*) FROM TB_TRAVELERS T WHERE T.ID_RESERVATION = @ReservationId) AS NVARCHAR(10))
         
         RAISERROR(@ErrorMessage, 16, 1)
         ROLLBACK TRANSACTION
