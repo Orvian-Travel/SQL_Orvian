@@ -174,6 +174,7 @@ GO
 -- Tabela: TB_PACKAGES
 -- Eventos: DELETE
 -- Relacionamento: Verifica TB_PACKAGES_DATES
+-- Trigger Desativada
 -- =================================================================
 CREATE OR ALTER TRIGGER TRG_PREVENT_DELETE_WITH_ACTIVE_DATES
 ON TB_PACKAGES
@@ -310,10 +311,13 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    -- Bloqueia apenas se houver RESERVAS ATIVAS (não canceladas)
     IF EXISTS (
         SELECT 1
         FROM DELETED D
-        INNER JOIN TB_RESERVATIONS R ON R.ID_PACKAGES_DATES = D.ID
+        INNER JOIN TB_RESERVATIONS R 
+            ON R.ID_PACKAGES_DATES = D.ID
+        WHERE R.SITUATION <> 'CANCELADA' -- <--- ajuste o campo/valor conforme seu modelo!
     )
     BEGIN
         RAISERROR('NÃO É PERMITIDO EXCLUIR UMA DATA DE PACOTE COM RESERVAS ATIVAS!', 16, 1)
